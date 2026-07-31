@@ -1,0 +1,17 @@
+# Render 部署配置（免费 Web 服务，固定地址 *.onrender.com）
+# 文档: https://render.com/docs/deploy-node-express-app
+services:
+  - type: web
+    name: junhuoshang
+    runtime: node
+    plan: free
+    region: singapore          # 离国内更近；可选 oregon / frankfurt
+    branch: main               # 你的仓库默认分支
+    buildCommand: "npm install"
+    startCommand: "node server.js"
+    healthCheckPath: /api/purchases
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"         # Render 注入实际端口，这里仅为占位
