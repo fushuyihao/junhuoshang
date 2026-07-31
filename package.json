@@ -1,0 +1,13 @@
+{
+  "name": "junhuoshang",
+  "version": "1.0.0",
+  "private": true,
+  "description": "军火商 — 子弹倒卖记账（跨设备同步）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
