@@ -7,7 +7,8 @@ const crypto = require('crypto');
 
 const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, 'public');
-const DATA_DIR = path.join(ROOT, 'data');
+// 数据持久化目录：若平台挂载了持久卷 /data（如 Hugging Face Spaces 持久存储）则优先使用，否则用仓库内 ./data
+const DATA_DIR = fs.existsSync('/data') ? '/data' : path.join(ROOT, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 const PORT = process.env.PORT || 3000;
 
