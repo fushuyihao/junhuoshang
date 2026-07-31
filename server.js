@@ -6,7 +6,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = __dirname;
-const PUBLIC_DIR = path.join(ROOT, 'public');
+const PUBLIC_DIR = ROOT; // 前端文件平铺在根目录（便于一键上传到 HF Spaces 等）
 // 数据持久化目录：若平台挂载了持久卷 /data（如 Hugging Face Spaces 持久存储）则优先使用，否则用仓库内 ./data
 const DATA_DIR = fs.existsSync('/data') ? '/data' : path.join(ROOT, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -160,25 +160,19 @@ const server = http.createServer(async (req, res) => {
       const handled = await handleApi(req, res, url);
       if (handled) return;
     }
-    // 静态资源
-    let filePath = path.join(PUBLIC_DIR, url.pathname === '/' ? 'index.html' : url.pathname);
-    filePath = path.normalize(filePath);
-    if (!filePath.startsWith(PUBLIC_DIR)) {
-      res.writeHead(403);
-      res.end('forbidden');
+    // 静态资源（仅允许白名单内的前端文件，避免暴露服务端/数据文件）
+    const PUBLIC_FILES = new Set(['index.html', 'app.js', 'styles.css']);
+    const rel = url.pathname === '/' ? 'index.html' : url.pathname.replace(/^\/+/, '');
+    if (!PUBLIC_FILES.has(rel)) {
+      res.writeHead(404);
+      res.end('not found');
       return;
     }
+    const filePath = path.join(PUBLIC_DIR, rel);
     fs.readFile(filePath, (err, content) => {
       if (err) {
-        fs.readFile(path.join(PUBLIC_DIR, 'index.html'), (e2, c2) => {
-          if (e2) {
-            res.writeHead(404);
-            res.end('not found');
-            return;
-          }
-          res.writeHead(200, { 'Content-Type': MIME['.html'] });
-          res.end(c2);
-        });
+        res.writeHead(404);
+        res.end('not found');
         return;
       }
       const ext = path.extname(filePath);
